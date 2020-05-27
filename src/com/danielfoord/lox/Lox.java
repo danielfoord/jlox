@@ -44,7 +44,6 @@ class Lox {
       System.out.print("> ");
       run(reader.readLine());
       hadError = false;
-      hadError = false;
     }
   }
 
