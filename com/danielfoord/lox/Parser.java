@@ -11,7 +11,7 @@ import com.danielfoord.lox.statements.*;
 // declaration → varDecl | statement ;
 // statement   → exprStmt | printStmt | block ;
 
-// varDecl     → "var" IDENTIFIER ( "=" expression )? ";" ;
+// varDecl   → "var" IDENTIFIER ( "=" expression )? ";" ;
 // block     → "{" declaration* "}" ;
 // exprStmt  → expression ";" ;
 // printStmt → "print" expression ";" ;
@@ -46,7 +46,7 @@ public class Parser {
     return statements;
   }
 
-  //#region Statements
+  // #region Statements
   private Stmt declaration() {
     try {
       if (peekMatch(TokenType.VAR))
@@ -99,9 +99,9 @@ public class Parser {
     consume(TokenType.SEMICOLON, "Expect ';' after expression.");
     return new VarStmt(name, initializer);
   }
-  //#endregion
+  // #endregion
 
-  //#region Expressions
+  // #region Expressions
   private Expr expression() {
     return assignment();
   }
@@ -114,7 +114,7 @@ public class Parser {
       Expr value = assignment();
 
       if (expr instanceof VariableExpr) {
-        Token name = ((VariableExpr)expr).name;
+        Token name = ((VariableExpr) expr).name;
         return new AssignExpr(name, value);
       }
 
@@ -204,9 +204,9 @@ public class Parser {
 
     throw error(peek(), "Expect expression.");
   }
-  //#endregion
+  // #endregion
 
-  //#region Util
+  // #region Util
   private Token consume(TokenType type, String message) {
     if (checkNext(type))
       return advance();
@@ -280,5 +280,5 @@ public class Parser {
       advance();
     }
   }
-  //#endregion
+  // #endregion
 }
