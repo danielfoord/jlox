@@ -3,28 +3,21 @@ package com.danielfoord.lox;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.danielfoord.lox.expressions.AssignExpr;
-import com.danielfoord.lox.expressions.BinaryExpr;
-import com.danielfoord.lox.expressions.Expr;
-import com.danielfoord.lox.expressions.GroupingExpr;
-import com.danielfoord.lox.expressions.LiteralExpr;
-import com.danielfoord.lox.expressions.UnaryExpr;
-import com.danielfoord.lox.expressions.VariableExpr;
-import com.danielfoord.lox.statements.ExpressionStmt;
-import com.danielfoord.lox.statements.PrintStmt;
-import com.danielfoord.lox.statements.Stmt;
-import com.danielfoord.lox.statements.VarStmt;
+import com.danielfoord.lox.expressions.*;
+import com.danielfoord.lox.statements.*;
 
 // program     → declaration* EOF ;
-// declaration → varDecl | statement ;
-// statement   → exprStmt | printStmt ;
 
-// varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+// declaration → varDecl | statement ;
+// statement   → exprStmt | printStmt | block ;
+
+// varDecl     → "var" IDENTIFIER ( "=" expression )? ";" ;
+// block     → "{" declaration* "}" ;
 // exprStmt  → expression ";" ;
 // printStmt → "print" expression ";" ;
 
-// expression → assignment ;
-// assignment → IDENTIFIER "=" assignment | equality ;
+// expression     → assignment ;
+// assignment     → IDENTIFIER "=" assignment | equality ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 // addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -53,6 +46,7 @@ public class Parser {
     return statements;
   }
 
+  //#region Statements
   private Stmt declaration() {
     try {
       if (peekMatch(TokenType.VAR))
@@ -67,6 +61,8 @@ public class Parser {
   private Stmt statement() {
     if (peekMatch(TokenType.PRINT))
       return printStatement();
+    if (peekMatch(TokenType.LEFT_BRACE))
+      return new BlockStmt(block());
 
     return expressionStatement();
   }
@@ -75,6 +71,15 @@ public class Parser {
     Expr expression = expression();
     consume(TokenType.SEMICOLON, "Expect ';' after expression.");
     return new PrintStmt(expression);
+  }
+
+  private List<Stmt> block() {
+    List<Stmt> statements = new ArrayList<>();
+    while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+      statements.add(declaration());
+    }
+    consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
   }
 
   private Stmt expressionStatement() {
@@ -94,7 +99,9 @@ public class Parser {
     consume(TokenType.SEMICOLON, "Expect ';' after expression.");
     return new VarStmt(name, initializer);
   }
+  //#endregion
 
+  //#region Expressions
   private Expr expression() {
     return assignment();
   }
@@ -197,7 +204,9 @@ public class Parser {
 
     throw error(peek(), "Expect expression.");
   }
+  //#endregion
 
+  //#region Util
   private Token consume(TokenType type, String message) {
     if (checkNext(type))
       return advance();
@@ -271,4 +280,5 @@ public class Parser {
       advance();
     }
   }
+  //#endregion
 }

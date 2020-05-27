@@ -2,24 +2,14 @@ package com.danielfoord.lox;
 
 import java.util.List;
 
-import com.danielfoord.lox.expressions.AssignExpr;
-import com.danielfoord.lox.expressions.BinaryExpr;
-import com.danielfoord.lox.expressions.Expr;
-import com.danielfoord.lox.expressions.ExprVisitor;
-import com.danielfoord.lox.expressions.GroupingExpr;
-import com.danielfoord.lox.expressions.LiteralExpr;
-import com.danielfoord.lox.expressions.UnaryExpr;
-import com.danielfoord.lox.expressions.VariableExpr;
-import com.danielfoord.lox.statements.ExpressionStmt;
-import com.danielfoord.lox.statements.PrintStmt;
-import com.danielfoord.lox.statements.Stmt;
-import com.danielfoord.lox.statements.StmtVisitor;
-import com.danielfoord.lox.statements.VarStmt;
+import com.danielfoord.lox.expressions.*;
+import com.danielfoord.lox.statements.*;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     private Environment environment = new Environment();
 
+    //#region Expressions
     @Override
     public Object visitBinaryExpr(BinaryExpr expression) {
         Object left = evaluate(expression.left);
@@ -97,7 +87,9 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     public Object visitVariableExpr(VariableExpr expression) {
         return environment.get(expression.name);
     }
+    //#endregion
 
+    //#region Statements
     @Override
     public Void visitExpressionStmt(ExpressionStmt statement) {
         evaluate(statement.expression);
@@ -122,6 +114,26 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         return null;
     }
 
+    @Override
+    public Object visitBlockStmt(BlockStmt statement) {
+        executeBlock(statement.statements, new Environment(this.environment));
+        return null;
+    }
+
+    private void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+            for (Stmt stmt : statements) {
+                execute(stmt);
+            }
+        } finally {
+            this.environment = previous;
+        }
+    }
+    //#endregion
+
+    //#region Util
     public void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -189,7 +201,5 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
         throw new RuntimeError(token, "Expected operand type " + expectedOperandType);
     }
-
-
-
+    //#endregion
 }
