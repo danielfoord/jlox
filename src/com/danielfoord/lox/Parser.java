@@ -9,13 +9,14 @@ import com.danielfoord.lox.statements.*;
 // program     → declaration* EOF ;
 
 // declaration → var_declaration | statement ;
-// statement   → exprStmt | printStmt | block | ifStmt;
+// statement   → exprStmt | printStmt | block | ifStmt | whileStmt;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
 // block             → "{" declaration* "}" ;
 // exprStmt          → expression ";" ;
 // printStmt         → "print" expression ";" ;
 // ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
+// whileStmt         → "while" "(" expression ")" statement ;
 
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment | logic_or ;
@@ -67,6 +68,8 @@ public class Parser {
       return new BlockStmt(block());
     if (peekMatch(TokenType.IF))
       return ifStatement();
+    if (peekMatch(TokenType.WHILE))
+      return whileStatement();
 
     return expressionStatement();
   }
@@ -97,6 +100,14 @@ public class Parser {
       elseStatement = statement();
     }
     return new IfStmt(condition, ifStatement, elseStatement);
+  }
+
+  private Stmt whileStatement() {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
+    Expr expression = expression();
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
+    Stmt statement = statement();
+    return new WhileStmt(expression, statement);
   }
 
   private Stmt expressionStatement() {

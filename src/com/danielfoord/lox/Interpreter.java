@@ -143,6 +143,14 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         return null;
     }
 
+    @Override
+    public Object visitWhileStmt(WhileStmt statement) {
+        while (isTruthy(evaluate(statement.condition))) {
+            execute(statement.statement);
+        }
+        return null;
+    }
+
     private void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
         try {

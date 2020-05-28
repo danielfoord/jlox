@@ -6,4 +6,5 @@ public interface StmtVisitor<R> {
     R visitVarStmt(VarStmt statement);
     R visitBlockStmt(BlockStmt statement);
     R visitIfStmt(IfStmt statement);
+    R visitWhileStmt(WhileStmt statement);
 }
