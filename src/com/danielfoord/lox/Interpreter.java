@@ -1,9 +1,9 @@
 package com.danielfoord.lox;
 
-import java.util.List;
-
 import com.danielfoord.lox.expressions.*;
 import com.danielfoord.lox.statements.*;
+
+import java.util.List;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
@@ -88,7 +88,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         Object left = evaluate(expression.left);
 
         if (expression.operator.type == TokenType.OR) {
-            if (isTruthy(left))  return left;
+            if (isTruthy(left)) return left;
         } else {
             if (!isTruthy(left)) return left;
         }

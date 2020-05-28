@@ -1,11 +1,11 @@
 package com.danielfoord.lox;
 
+import com.danielfoord.lox.expressions.*;
+import com.danielfoord.lox.statements.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.danielfoord.lox.expressions.*;
-import com.danielfoord.lox.statements.*;
 
 // program     → declaration* EOF ;
 
@@ -32,13 +32,8 @@ import com.danielfoord.lox.statements.*;
 // primary        → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
 
 public class Parser {
-    private static class ParseError extends RuntimeException {
-        private static final long serialVersionUID = 4603695572380937534L;
-    }
-
     private final List<Token> tokens;
     private int current = 0;
-
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
@@ -115,45 +110,45 @@ public class Parser {
     }
 
     private Stmt forStatement() {
-       consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'");
 
-       Stmt initializer;
-       if (peekMatch(TokenType.SEMICOLON)) {
+        Stmt initializer;
+        if (peekMatch(TokenType.SEMICOLON)) {
             initializer = null;
-       } else if (peekMatch((TokenType.VAR))) {
-           initializer = varDeclaration();
-       } else {
-           initializer = expressionStatement();
-       }
+        } else if (peekMatch((TokenType.VAR))) {
+            initializer = varDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
 
-       Expr condition = null;
-       if (!checkNext(TokenType.SEMICOLON)) {
-           condition = expression();
-       }
-       consume(TokenType.SEMICOLON, "Expect ';' after loop condition");
+        Expr condition = null;
+        if (!checkNext(TokenType.SEMICOLON)) {
+            condition = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after loop condition");
 
-       Expr increment = null;
-       if(!checkNext(TokenType.RIGHT_PAREN)) {
-           increment = expression();
-       }
-       consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
-       Stmt body = statement();
+        Expr increment = null;
+        if (!checkNext(TokenType.RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
+        Stmt body = statement();
 
-       if (increment != null) {
-           body = new BlockStmt(Arrays.asList(body, new ExpressionStmt(increment)));
-       }
+        if (increment != null) {
+            body = new BlockStmt(Arrays.asList(body, new ExpressionStmt(increment)));
+        }
 
-       if (condition == null) {
-           condition = new LiteralExpr(true);
-       }
+        if (condition == null) {
+            condition = new LiteralExpr(true);
+        }
 
-       body = new WhileStmt(condition, body);
+        body = new WhileStmt(condition, body);
 
-       if (initializer != null) {
-           body = new BlockStmt(Arrays.asList(initializer, body));
-       }
+        if (initializer != null) {
+            body = new BlockStmt(Arrays.asList(initializer, body));
+        }
 
-       return body;
+        return body;
     }
 
     private Stmt expressionStatement() {
@@ -173,12 +168,12 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new VarStmt(name, initializer);
     }
-    //#endregion
 
     //#region Expressions
     private Expr expression() {
         return assignment();
     }
+    //#endregion
 
     private Expr assignment() {
         Expr expr = logicOr();
@@ -300,7 +295,6 @@ public class Parser {
 
         throw error(peek(), "Expect expression.");
     }
-    //#endregion
 
     //#region Util
     private Token consume(TokenType type, String message) {
@@ -309,6 +303,7 @@ public class Parser {
 
         throw error(peek(), message);
     }
+    //#endregion
 
     private Token advance() {
         if (!isAtEnd()) {
@@ -375,6 +370,10 @@ public class Parser {
 
             advance();
         }
+    }
+
+    private static class ParseError extends RuntimeException {
+        private static final long serialVersionUID = 4603695572380937534L;
     }
     //#endregion
 }
