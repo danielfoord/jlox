@@ -9,21 +9,23 @@ import com.danielfoord.lox.statements.*;
 // program     → declaration* EOF ;
 
 // declaration → var_declaration | statement ;
-// statement   → exprStmt | printStmt | block ;
+// statement   → exprStmt | printStmt | block | ifStmt;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
-// block     → "{" declaration* "}" ;
-// exprStmt  → expression ";" ;
-// printStmt → "print" expression ";" ;
+// block             → "{" declaration* "}" ;
+// exprStmt          → expression ";" ;
+// printStmt         → "print" expression ";" ;
+// ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
 
 // expression     → assignment ;
-// assignment     → IDENTIFIER "=" assignment | equality ;
+// assignment     → IDENTIFIER "=" assignment | logic_or ;
+// logic_or       → logic_and ( "or" logic_and )*;
+// logic_and      → equality ( "and" equality )*;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 // addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
 // multiplication → unary ( ( "/" | "*" ) unary )* ;
-// unary          → ( "!" | "-" ) unary
-//                | primary ;
+// unary          → ( "!" | "-" ) unary | primary ;
 // primary        → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
 
 public class Parser {
@@ -63,6 +65,8 @@ public class Parser {
       return printStatement();
     if (peekMatch(TokenType.LEFT_BRACE))
       return new BlockStmt(block());
+    if (peekMatch(TokenType.IF))
+      return ifStatement();
 
     return expressionStatement();
   }
@@ -80,6 +84,19 @@ public class Parser {
     }
     consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
     return statements;
+  }
+
+  private Stmt ifStatement() {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+    Expr condition = expression();
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+
+    Stmt ifStatement = statement();
+    Stmt elseStatement = null;
+    if (peekMatch(TokenType.ELSE)) {
+      elseStatement = statement();
+    }
+    return new IfStmt(condition, ifStatement, elseStatement);
   }
 
   private Stmt expressionStatement() {
@@ -107,7 +124,7 @@ public class Parser {
   }
 
   private Expr assignment() {
-    Expr expr = equality();
+    Expr expr = logicOr();
 
     if (peekMatch(TokenType.EQUAL)) {
       Token equals = previous();
@@ -118,10 +135,34 @@ public class Parser {
         return new AssignExpr(name, value);
       }
 
-      error(equals, "Invalid assignment target.");
+      throw error(equals, "Invalid assignment target.");
     }
 
     return expr;
+  }
+
+  private Expr logicOr() {
+    Expr expression = logicAnd();
+
+    while (peekMatch(TokenType.OR)) {
+      Token operator = previous();
+      Expr rightExpression = logicAnd();
+      expression = new LogicExpr(expression, operator, rightExpression);
+    }
+
+    return expression;
+  }
+
+  private Expr logicAnd() {
+    Expr expression = equality();
+
+    while (peekMatch(TokenType.AND)) {
+      Token operator = previous();
+      Expr rightExpression = equality();
+      expression = new LogicExpr(expression, operator, rightExpression);
+    }
+
+    return expression;
   }
 
   private Expr equality() {

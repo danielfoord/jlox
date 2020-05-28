@@ -1,13 +1,6 @@
 package com.danielfoord.lox;
 
-import com.danielfoord.lox.expressions.AssignExpr;
-import com.danielfoord.lox.expressions.BinaryExpr;
-import com.danielfoord.lox.expressions.Expr;
-import com.danielfoord.lox.expressions.ExprVisitor;
-import com.danielfoord.lox.expressions.GroupingExpr;
-import com.danielfoord.lox.expressions.LiteralExpr;
-import com.danielfoord.lox.expressions.UnaryExpr;
-import com.danielfoord.lox.expressions.VariableExpr;
+import com.danielfoord.lox.expressions.*;
 
 public class AstPrinter implements ExprVisitor<String> {
 
@@ -43,11 +36,11 @@ public class AstPrinter implements ExprVisitor<String> {
     return expr.accept(this);
   }
 
-  private String parenthesize(String name, Expr... exprs) {
+  private String parenthesize(String name, Expr... expressions) {
     StringBuilder builder = new StringBuilder();
 
     builder.append("(").append(name);
-    for (Expr expr : exprs) {
+    for (Expr expr : expressions) {
       builder.append(" ");
       builder.append(expr.accept(this));
     }
@@ -59,5 +52,10 @@ public class AstPrinter implements ExprVisitor<String> {
   @Override
   public String visitAssignExpr(AssignExpr expression) {
     return parenthesize(expression.name.lexeme, expression);
+  }
+
+  @Override
+  public String visitLogicExpr(LogicExpr expression) {
+    return parenthesize(expression.operator.lexeme, expression.left, expression.right);
   }
 }

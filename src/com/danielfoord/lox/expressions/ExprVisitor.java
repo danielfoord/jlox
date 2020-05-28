@@ -7,4 +7,5 @@ public interface ExprVisitor<R> {
   R visitUnaryExpr(UnaryExpr expression);
   R visitVariableExpr(VariableExpr expression);
   R visitAssignExpr(AssignExpr expression);
+  R visitLogicExpr(LogicExpr expression);
 }
