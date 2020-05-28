@@ -8,10 +8,10 @@ import com.danielfoord.lox.statements.*;
 
 // program     → declaration* EOF ;
 
-// declaration → varDecl | statement ;
+// declaration → var_declaration | statement ;
 // statement   → exprStmt | printStmt | block ;
 
-// varDecl   → "var" IDENTIFIER ( "=" expression )? ";" ;
+// var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
 // block     → "{" declaration* "}" ;
 // exprStmt  → expression ";" ;
 // printStmt → "print" expression ";" ;

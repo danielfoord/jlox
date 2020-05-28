@@ -3,8 +3,8 @@ package com.danielfoord.lox.expressions;
 public class GroupingExpr extends Expr {
   public final Expr expression;
 
-  public GroupingExpr(Expr expresson) {
-    this.expression = expresson;
+  public GroupingExpr(Expr expression) {
+    this.expression = expression;
   }
 
   @Override
