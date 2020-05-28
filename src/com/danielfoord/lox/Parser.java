@@ -1,6 +1,7 @@
 package com.danielfoord.lox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.danielfoord.lox.expressions.*;
@@ -9,7 +10,7 @@ import com.danielfoord.lox.statements.*;
 // program     → declaration* EOF ;
 
 // declaration → var_declaration | statement ;
-// statement   → exprStmt | printStmt | block | ifStmt | whileStmt;
+// statement   → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
 // block             → "{" declaration* "}" ;
@@ -17,6 +18,7 @@ import com.danielfoord.lox.statements.*;
 // printStmt         → "print" expression ";" ;
 // ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
 // whileStmt         → "while" "(" expression ")" statement ;
+// forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" statement ;
 
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment | logic_or ;
@@ -49,7 +51,7 @@ public class Parser {
         return statements;
     }
 
-    // #region Statements
+    //#region Statements
     private Stmt declaration() {
         try {
             if (peekMatch(TokenType.VAR))
@@ -70,6 +72,8 @@ public class Parser {
             return ifStatement();
         if (peekMatch(TokenType.WHILE))
             return whileStatement();
+        if (peekMatch(TokenType.FOR))
+            return forStatement();
 
         return expressionStatement();
     }
@@ -110,6 +114,48 @@ public class Parser {
         return new WhileStmt(expression, statement);
     }
 
+    private Stmt forStatement() {
+       consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'");
+
+       Stmt initializer;
+       if (peekMatch(TokenType.SEMICOLON)) {
+            initializer = null;
+       } else if (peekMatch((TokenType.VAR))) {
+           initializer = varDeclaration();
+       } else {
+           initializer = expressionStatement();
+       }
+
+       Expr condition = null;
+       if (!checkNext(TokenType.SEMICOLON)) {
+           condition = expression();
+       }
+       consume(TokenType.SEMICOLON, "Expect ';' after loop condition");
+
+       Expr increment = null;
+       if(!checkNext(TokenType.RIGHT_PAREN)) {
+           increment = expression();
+       }
+       consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
+       Stmt body = statement();
+
+       if (increment != null) {
+           body = new BlockStmt(Arrays.asList(body, new ExpressionStmt(increment)));
+       }
+
+       if (condition == null) {
+           condition = new LiteralExpr(true);
+       }
+
+       body = new WhileStmt(condition, body);
+
+       if (initializer != null) {
+           body = new BlockStmt(Arrays.asList(initializer, body));
+       }
+
+       return body;
+    }
+
     private Stmt expressionStatement() {
         Expr expression = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
@@ -127,9 +173,9 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new VarStmt(name, initializer);
     }
-    // #endregion
+    //#endregion
 
-    // #region Expressions
+    //#region Expressions
     private Expr expression() {
         return assignment();
     }
@@ -241,12 +287,10 @@ public class Parser {
             return new LiteralExpr(true);
         if (peekMatch(TokenType.NIL))
             return new LiteralExpr(null);
-        if (peekMatch(TokenType.IDENTIFIER)) {
+        if (peekMatch(TokenType.IDENTIFIER))
             return new VariableExpr(previous());
-        }
-        if (peekMatch(TokenType.NUMBER, TokenType.STRING)) {
+        if (peekMatch(TokenType.NUMBER, TokenType.STRING))
             return new LiteralExpr(previous().literal);
-        }
 
         if (peekMatch(TokenType.LEFT_PAREN)) {
             Expr expr = expression();
@@ -256,9 +300,9 @@ public class Parser {
 
         throw error(peek(), "Expect expression.");
     }
-    // #endregion
+    //#endregion
 
-    // #region Util
+    //#region Util
     private Token consume(TokenType type, String message) {
         if (checkNext(type))
             return advance();
@@ -332,5 +376,5 @@ public class Parser {
             advance();
         }
     }
-    // #endregion
+    //#endregion
 }

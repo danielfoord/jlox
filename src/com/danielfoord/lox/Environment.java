@@ -19,28 +19,28 @@ public class Environment {
         values.put(name, value);
     }
 
-    public Object get(Token identifer) {
-        if (values.containsKey(identifer.lexeme)) {
-            return values.get(identifer.lexeme);
+    public Object get(Token identifier) {
+        if (values.containsKey(identifier.lexeme)) {
+            return values.get(identifier.lexeme);
         }
 
         if (enclosing != null) {
-            return enclosing.get(identifer);
+            return enclosing.get(identifier);
         }
 
-        throw new RuntimeError(identifer, "Undefined variable '" + identifer.lexeme + "'.");
+        throw new RuntimeError(identifier, "Undefined variable '" + identifier.lexeme + "'.");
     }
 
-    public Object assign(Token identifer, Object value) {
-        if (values.containsKey(identifer.lexeme)) {
-            values.put(identifer.lexeme, value);
+    public Object assign(Token identifier, Object value) {
+        if (values.containsKey(identifier.lexeme)) {
+            values.put(identifier.lexeme, value);
             return value;
         }
 
         if (enclosing != null) {
-            return enclosing.assign(identifer, value);
+            return enclosing.assign(identifier, value);
         }
 
-        throw new RuntimeError(identifer, "Undefined variable '" + identifer.lexeme + "'.");
+        throw new RuntimeError(identifier, "Undefined variable '" + identifier.lexeme + "'.");
     }
 }
