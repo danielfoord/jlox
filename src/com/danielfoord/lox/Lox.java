@@ -1,15 +1,14 @@
 package com.danielfoord.lox;
 
+import com.danielfoord.lox.statements.Stmt;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
-import java.util.List;
-
-import com.danielfoord.lox.statements.Stmt;
-
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 class Lox {
     static boolean hadError = false;
@@ -40,7 +39,7 @@ class Lox {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
-        for (;;) {
+        for (; ; ) {
             System.out.print(">> ");
             run(reader.readLine());
             hadError = false;

@@ -34,6 +34,7 @@ import java.util.List;
 public class Parser {
     private final List<Token> tokens;
     private int current = 0;
+
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
@@ -168,12 +169,12 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new VarStmt(name, initializer);
     }
+    //#endregion
 
     //#region Expressions
     private Expr expression() {
         return assignment();
     }
-    //#endregion
 
     private Expr assignment() {
         Expr expr = logicOr();
@@ -295,6 +296,7 @@ public class Parser {
 
         throw error(peek(), "Expect expression.");
     }
+    //#endregion
 
     //#region Util
     private Token consume(TokenType type, String message) {
@@ -303,7 +305,6 @@ public class Parser {
 
         throw error(peek(), message);
     }
-    //#endregion
 
     private Token advance() {
         if (!isAtEnd()) {
