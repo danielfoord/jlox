@@ -15,5 +15,5 @@ package com.danielfoord.lox.expressions;
 //            | "+"  | "-"  | "*" | "/" ;
 
 public abstract class Expr {
-  public abstract <R> R accept(ExprVisitor<R> visitor);
+    public abstract <R> R accept(ExprVisitor<R> visitor);
 }
