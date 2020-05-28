@@ -13,6 +13,7 @@ import java.util.List;
 // statement   → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
+// break             → "break" ";" ; TODO: Add support
 // block             → "{" declaration* "}" ;
 // exprStmt          → expression ";" ;
 // printStmt         → "print" expression ";" ;
