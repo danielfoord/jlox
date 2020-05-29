@@ -348,7 +348,8 @@ public class Parser {
         advance();
 
         while (!isAtEnd()) {
-            if (previous().type == TokenType.SEMICOLON)
+            // If we are at the end of a statement, but we want to advance if we are at the end of a block
+            if (previous().type == TokenType.SEMICOLON && peek().type != TokenType.RIGHT_BRACE)
                 return;
 
             switch (peek().type) {
