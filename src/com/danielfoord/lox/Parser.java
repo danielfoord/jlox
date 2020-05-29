@@ -7,38 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// program     → declaration* EOF ;
-
-// declaration       → var_declaration | statement ;
-// loopDeclaration   → var_declaration | loopStatement ;
-// statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
-// loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | break;
-
-// var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
-// printStmt         → "print" expression ";" ;
-
-// break             → "break" ";" ;
-// block             → "{" declaration* "}" ;
-// loopBlock         → "{" ( loopDeclaration* ) break? "}" ;
-
-// exprStmt          → expression ";" ;
-// ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
-// loopIfStmt        → "if" "(" expression ")" loopStatement "else" loopStatement ";" ;
-
-// whileStmt         → "while" "(" expression ")" loopStatement ;
-// forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
-
-// expression     → assignment ;
-// assignment     → IDENTIFIER "=" assignment | logic_or ;
-// logic_or       → logic_and ( "or" logic_and )*;
-// logic_and      → equality ( "and" equality )*;
-// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-// comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
-// addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
-// multiplication → unary ( ( "/" | "*" ) unary )* ;
-// unary          → ( "!" | "-" ) unary | primary ;
-// primary        → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
-
 public class Parser {
     private final List<Token> tokens;
     private int current = 0;
