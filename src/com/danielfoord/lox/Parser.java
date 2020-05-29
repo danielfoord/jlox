@@ -10,18 +10,24 @@ import java.util.Optional;
 
 // program     → declaration* EOF ;
 
-// declaration → var_declaration | statement ;
-// loop_declaration → var_declaration | statement | break ;
-// statement   → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
+// declaration       → var_declaration | statement ;
+// loopDeclaration   → var_declaration | loopStatement ;
+// statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
+// loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | break;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
+// printStmt         → "print" expression ";" ;
+
 // break             → "break" ";" ;
 // block             → "{" declaration* "}" ;
+// loopBlock         → "{" ( loopDeclaration* ) break? "}" ;
+
 // exprStmt          → expression ";" ;
-// printStmt         → "print" expression ";" ;
 // ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
-// whileStmt         → "while" "(" expression ")" statement ;
-// forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" statement ;
+// loopIfStmt        → "if" "(" expression ")" loopStatement "else" loopStatement ";" ;
+
+// whileStmt         → "while" "(" expression ")" loopStatement ;
+// forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
 
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment | logic_or ;
