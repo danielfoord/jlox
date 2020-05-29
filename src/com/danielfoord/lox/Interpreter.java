@@ -243,11 +243,18 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         throw new RuntimeError(token, "Expected operand type " + expectedOperandType);
     }
 
-    private String stringify(Object value) {
-        if (value == null) {
+    private String stringify(Object object) {
+        if (object == null)
             return "nil";
+
+        if (object instanceof Double) {
+            String text = object.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
         }
-        return value.toString();
+        return object.toString();
     }
     //#endregion
 }
