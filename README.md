@@ -4,7 +4,7 @@ An implementation of Lox from [craftinginterpreters.com](craftinginterpreters.co
 With some of the challenges implemented.
 
 ```
-program     → declaration* EOF ;
+program           → declaration* EOF ;
 
 declaration       → var_declaration | statement ;
 loopDeclaration   → var_declaration | loopStatement ;
