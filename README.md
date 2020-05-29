@@ -1,8 +1,11 @@
 # Lox 
 
 An implementation of Lox from [craftinginterpreters.com](craftinginterpreters.com).
-With some of the challenges implemented.
+With some challenges implemented.
 
+#### Context free grammar:
+
+##### Syntactic Grammar
 ```
 program           → declaration* EOF ;
 
@@ -23,7 +26,9 @@ ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
 loopIfStmt        → "if" "(" expression ")" loopStatement "else" loopStatement ";" ;
 whileStmt         → "while" "(" expression ")" loopStatement ;
 forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
-
+```
+##### Lexical Grammar
+```
 expression        → assignment ;
 assignment        → IDENTIFIER "=" assignment | logic_or ;
 logic_or          → logic_and ( "or" logic_and )*;
