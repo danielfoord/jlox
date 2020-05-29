@@ -8,6 +8,7 @@ import java.util.List;
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     private Environment environment = new Environment();
+    private boolean hitBreak = false;
 
     //#region Expressions
     @Override
@@ -145,9 +146,16 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     @Override
     public Object visitWhileStmt(WhileStmt statement) {
-        while (isTruthy(evaluate(statement.condition))) {
+        while (!hitBreak && isTruthy(evaluate(statement.condition))) {
             execute(statement.statement);
         }
+        hitBreak = false;
+        return null;
+    }
+
+    @Override
+    public Object visitBreakStmt(BreakStmt statement) {
+        hitBreak = true;
         return null;
     }
 
@@ -157,6 +165,9 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             this.environment = environment;
             for (Stmt stmt : statements) {
                 execute(stmt);
+                if (hitBreak) {
+                    break;
+                }
             }
         } finally {
             this.environment = previous;

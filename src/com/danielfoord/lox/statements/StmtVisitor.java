@@ -12,4 +12,6 @@ public interface StmtVisitor<R> {
     R visitIfStmt(IfStmt statement);
 
     R visitWhileStmt(WhileStmt statement);
+
+    R visitBreakStmt(BreakStmt statement);
 }

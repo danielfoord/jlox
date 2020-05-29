@@ -6,6 +6,7 @@ import com.danielfoord.lox.statements.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 // program     → declaration* EOF ;
 
@@ -13,7 +14,7 @@ import java.util.List;
 // statement   → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
-// break             → "break" ";" ; TODO: Add support
+// break             → "break" ";" ;
 // block             → "{" declaration* "}" ;
 // exprStmt          → expression ";" ;
 // printStmt         → "print" expression ";" ;
@@ -50,29 +51,40 @@ public class Parser {
 
     //#region Statements
     private Stmt declaration() {
+        return declaration(false);
+    }
+
+    private Stmt declaration(boolean allowBreak) {
         try {
             if (peekMatch(TokenType.VAR))
                 return varDeclaration();
-            return statement();
+            return statement(allowBreak);
         } catch (ParseError error) {
             synchronize();
             return null;
         }
     }
 
-    private Stmt statement() {
+    private Stmt statement(boolean allowBreak) {
         if (peekMatch(TokenType.PRINT))
             return printStatement();
         if (peekMatch(TokenType.LEFT_BRACE))
-            return new BlockStmt(block());
+            return new BlockStmt(block(allowBreak));
         if (peekMatch(TokenType.IF))
-            return ifStatement();
+            return ifStatement(allowBreak);
         if (peekMatch(TokenType.WHILE))
             return whileStatement();
         if (peekMatch(TokenType.FOR))
             return forStatement();
+        if (allowBreak && peekMatch(TokenType.BREAK))
+            return breakStatement();
 
         return expressionStatement();
+    }
+
+    private Stmt breakStatement() {
+        consume(TokenType.SEMICOLON, "Expect ';' after 'break'.");
+        return new BreakStmt();
     }
 
     private Stmt printStatement() {
@@ -81,24 +93,24 @@ public class Parser {
         return new PrintStmt(expression);
     }
 
-    private List<Stmt> block() {
+    private List<Stmt> block(boolean allowBreak) {
         List<Stmt> statements = new ArrayList<>();
         while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(declaration());
+            statements.add(declaration(allowBreak));
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
         return statements;
     }
 
-    private Stmt ifStatement() {
+    private Stmt ifStatement(boolean allowBreak) {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
         Expr condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
 
-        Stmt ifStatement = statement();
+        Stmt ifStatement = statement(allowBreak);
         Stmt elseStatement = null;
         if (peekMatch(TokenType.ELSE)) {
-            elseStatement = statement();
+            elseStatement = statement(allowBreak);
         }
         return new IfStmt(condition, ifStatement, elseStatement);
     }
@@ -107,7 +119,7 @@ public class Parser {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
         Expr expression = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
-        Stmt statement = statement();
+        Stmt statement = statement(true);
         return new WhileStmt(expression, statement);
     }
 
@@ -134,7 +146,7 @@ public class Parser {
             increment = expression();
         }
         consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
-        Stmt body = statement();
+        Stmt body = statement(true);
 
         if (increment != null) {
             body = new BlockStmt(Arrays.asList(body, new ExpressionStmt(increment)));
