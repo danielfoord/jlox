@@ -202,7 +202,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         else if (object instanceof Double)
             return (double) object > 0;
         else if (object instanceof String)
-            return object == "";
+            return !object.equals("");
         return true;
     }
 
