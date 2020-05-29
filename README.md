@@ -13,7 +13,6 @@ declaration       → var_declaration | statement ;
 loopDeclaration   → var_declaration | loopStatement ;
 
 var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
-
 statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
 loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | break;
 
@@ -29,6 +28,7 @@ forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression
 ```
 ##### Lexical Grammar
 ```
+arguments         → expression ( "," expression )* ;
 expression        → assignment ;
 assignment        → IDENTIFIER "=" assignment | logic_or ;
 logic_or          → logic_and ( "or" logic_and )*;
@@ -37,6 +37,7 @@ equality          → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison        → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition          → multiplication ( ( "-" | "+" ) multiplication )* ;
 multiplication    → unary ( ( "/" | "*" ) unary )* ;
-unary             → ( "!" | "-" ) unary | primary ;
+unary             → ( "!" | "-" ) unary | call ;
+call              → primary ( "(" arguments? ")" )* ;
 primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
 ```
