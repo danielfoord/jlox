@@ -113,7 +113,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     @Override
     public Object visitPrintStmt(PrintStmt statement) {
         Object value = evaluate(statement.expression);
-        System.out.println(value.toString());
+        System.out.println(stringify(value));
         return null;
     }
 
@@ -197,12 +197,11 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     private boolean isTruthy(Object object) {
         if (object == null)
             return false;
-        if (object instanceof Boolean)
+        else if (object instanceof Boolean)
             return (boolean) object;
-        if (object instanceof Double) {
-            return object.equals(0);
-        }
-        if (object instanceof String)
+        else if (object instanceof Double)
+            return (double) object > 0;
+        else if (object instanceof String)
             return object == "";
         return true;
     }
@@ -242,6 +241,13 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             expectedOperandType = "Boolean";
 
         throw new RuntimeError(token, "Expected operand type " + expectedOperandType);
+    }
+
+    private String stringify(Object value) {
+        if (value == null) {
+            return "nil";
+        }
+        return value.toString();
     }
     //#endregion
 }
