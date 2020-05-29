@@ -11,6 +11,7 @@ import java.util.Optional;
 // program     → declaration* EOF ;
 
 // declaration → var_declaration | statement ;
+// loop_declaration → var_declaration | statement | break ;
 // statement   → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
 
 // var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -54,29 +55,29 @@ public class Parser {
         return declaration(false);
     }
 
-    private Stmt declaration(boolean allowBreak) {
+    private Stmt declaration(boolean loopStatement) {
         try {
             if (peekMatch(TokenType.VAR))
                 return varDeclaration();
-            return statement(allowBreak);
+            return statement(loopStatement);
         } catch (ParseError error) {
             synchronize();
             return null;
         }
     }
 
-    private Stmt statement(boolean allowBreak) {
+    private Stmt statement(boolean loopStatement) {
         if (peekMatch(TokenType.PRINT))
             return printStatement();
         if (peekMatch(TokenType.LEFT_BRACE))
-            return new BlockStmt(block(allowBreak));
+            return new BlockStmt(block(loopStatement));
         if (peekMatch(TokenType.IF))
-            return ifStatement(allowBreak);
+            return ifStatement(loopStatement);
         if (peekMatch(TokenType.WHILE))
             return whileStatement();
         if (peekMatch(TokenType.FOR))
             return forStatement();
-        if (allowBreak && peekMatch(TokenType.BREAK))
+        if (loopStatement && peekMatch(TokenType.BREAK))
             return breakStatement();
 
         return expressionStatement();
@@ -93,24 +94,24 @@ public class Parser {
         return new PrintStmt(expression);
     }
 
-    private List<Stmt> block(boolean allowBreak) {
+    private List<Stmt> block(boolean loopStatement) {
         List<Stmt> statements = new ArrayList<>();
         while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(declaration(allowBreak));
+            statements.add(declaration(loopStatement));
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
         return statements;
     }
 
-    private Stmt ifStatement(boolean allowBreak) {
+    private Stmt ifStatement(boolean loopStatement) {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
         Expr condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
 
-        Stmt ifStatement = statement(allowBreak);
+        Stmt ifStatement = statement(loopStatement);
         Stmt elseStatement = null;
         if (peekMatch(TokenType.ELSE)) {
-            elseStatement = statement(allowBreak);
+            elseStatement = statement(loopStatement);
         }
         return new IfStmt(condition, ifStatement, elseStatement);
     }
