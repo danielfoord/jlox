@@ -14,4 +14,6 @@ public interface ExprVisitor<R> {
     R visitAssignExpr(AssignExpr expression);
 
     R visitLogicExpr(LogicExpr expression);
+
+    R visitCallExpr(CallExpr expression);
 }

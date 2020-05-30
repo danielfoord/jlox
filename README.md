@@ -9,22 +9,29 @@ With some challenges implemented.
 ```
 program           → declaration* EOF ;
 
-declaration       → var_declaration | statement ;
-loopDeclaration   → var_declaration | loopStatement ;
+declaration       → varDeclaration | statement | funDecl ;
+loopDeclaration   → varDeclaration | loopStatement ;
 
-var_declaration   → "var" IDENTIFIER ( "=" expression )? ";" ;
-statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt ;
-loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | break;
+varDeclaration    → "var" IDENTIFIER ( "=" expression )? ";" ;
 
+statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt | returnStmt;
+loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | breakStmt | returnStmt;
 printStmt         → "print" expression ";" ;
-break             → "break" ";" ;
+
+funDecl           → "fun" function;
+function          → IDENTIFIER "(" parameters? ")" block
+parameters        → IDENTIFIER ( "," IDENTIFIER )* ;
+
+breakStmt         → "break" ";" ;
+returnStmt        → "return" expression? ";" ;
 block             → "{" declaration* "}" ;
-loopBlock         → "{" ( loopDeclaration* ) break? "}" ;
+functionBlock     → "{" ( declaration* ) returnStmt? "}" ;
+loopBlock         → "{" ( loopDeclaration* ) breakStmt? "}" ;
 exprStmt          → expression ";" ;
 ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
 loopIfStmt        → "if" "(" expression ")" loopStatement "else" loopStatement ";" ;
 whileStmt         → "while" "(" expression ")" loopStatement ;
-forStmt           → "for" "(" ( var_declaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
+forStmt           → "for" "(" ( varDeclaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
 ```
 ##### Lexical Grammar
 ```

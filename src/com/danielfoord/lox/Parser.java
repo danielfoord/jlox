@@ -32,11 +32,44 @@ public class Parser {
         try {
             if (peekMatch(TokenType.VAR))
                 return varDeclaration();
+            if (peekMatch(TokenType.FUN))
+                return function("function");
             return statement(loopStatement);
         } catch (ParseError error) {
             synchronize();
             return null;
         }
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (peekMatch(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new VarStmt(name, initializer);
+    }
+
+    private Stmt function(String kind) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!checkNext(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Cannot have more than 255 parameters.");
+                }
+
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (peekMatch(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block(false);
+        return new FunctionStmt(name, parameters, body);
     }
 
     private Stmt statement(boolean loopStatement) {
@@ -50,6 +83,8 @@ public class Parser {
             return whileStatement();
         if (peekMatch(TokenType.FOR))
             return forStatement();
+        if (peekMatch(TokenType.RETURN))
+            return returnStatement();
         if (loopStatement && peekMatch(TokenType.BREAK))
             return breakStatement();
 
@@ -59,6 +94,17 @@ public class Parser {
     private Stmt breakStatement() {
         consume(TokenType.SEMICOLON, "Expect ';' after 'break'.");
         return new BreakStmt();
+    }
+
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr value = null;
+        if (!checkNext(TokenType.SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        return new ReturnStmt(keyword, value);
     }
 
     private Stmt printStatement() {
@@ -152,18 +198,6 @@ public class Parser {
         Expr expression = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new ExpressionStmt(expression);
-    }
-
-    private Stmt varDeclaration() {
-        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
-
-        Expr initializer = null;
-        if (peekMatch(TokenType.EQUAL)) {
-            initializer = expression();
-        }
-
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
-        return new VarStmt(name, initializer);
     }
     //#endregion
 
@@ -269,7 +303,20 @@ public class Parser {
             return new UnaryExpr(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr call() {
+        Expr expression = primary();
+
+        while (true) {
+            if (peekMatch(TokenType.LEFT_PAREN)) {
+                expression = finishCall(expression);
+            } else {
+                break;
+            }
+        }
+        return expression;
     }
 
     private Expr primary() {
@@ -368,6 +415,22 @@ public class Parser {
 
             advance();
         }
+    }
+
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!checkNext(TokenType.RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 255) { // Same as Java
+                    error(peek(), "Cannot have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while (peekMatch(TokenType.COMMA));
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new CallExpr(callee, paren, arguments);
     }
 
     private static class ParseError extends RuntimeException {

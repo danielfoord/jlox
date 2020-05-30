@@ -14,4 +14,8 @@ public interface StmtVisitor<R> {
     R visitWhileStmt(WhileStmt statement);
 
     R visitBreakStmt(BreakStmt statement);
+
+    R visitFunctionStmt(FunctionStmt statement);
+
+    R visitReturnStmt(ReturnStmt statement);
 }

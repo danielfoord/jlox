@@ -1,14 +1,120 @@
 package com.danielfoord.lox;
 
 import com.danielfoord.lox.expressions.*;
+import com.danielfoord.lox.functions.LoxCallable;
+import com.danielfoord.lox.functions.LoxFunction;
+import com.danielfoord.lox.functions.Return;
 import com.danielfoord.lox.statements.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
-
-    private Environment environment = new Environment();
+    public final Environment globals = new Environment();
+    public Environment environment = globals;
     private boolean hitBreak = false;
+
+    Interpreter() {
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return (double)System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() { return "<native fn>"; }
+        });
+    }
+
+    //#region Statements
+    @Override
+    public Void visitExpressionStmt(ExpressionStmt statement) {
+        evaluate(statement.expression);
+        return null;
+    }
+
+    @Override
+    public Object visitPrintStmt(PrintStmt statement) {
+        Object value = evaluate(statement.expression);
+        System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Object visitVarStmt(VarStmt statement) {
+        Object value = null;
+        if (statement.initializer != null) {
+            value = evaluate(statement.initializer);
+        }
+
+        environment.define(statement.name.lexeme, value);
+        return null;
+    }
+
+    @Override
+    public Object visitBlockStmt(BlockStmt statement) {
+        executeBlock(statement.statements, new Environment(this.environment));
+        return null;
+    }
+
+    @Override
+    public Object visitIfStmt(IfStmt statement) {
+        if (isTruthy(evaluate(statement.condition))) {
+            execute(statement.ifStatement);
+        } else if (statement.elseStatement != null) {
+            execute(statement.elseStatement);
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitWhileStmt(WhileStmt statement) {
+        while (!hitBreak && isTruthy(evaluate(statement.condition))) {
+            execute(statement.statement);
+        }
+        hitBreak = false;
+        return null;
+    }
+
+    @Override
+    public Object visitBreakStmt(BreakStmt statement) {
+        hitBreak = true;
+        return null;
+    }
+
+    @Override
+    public Object visitFunctionStmt(FunctionStmt statement) {
+        LoxFunction function = new LoxFunction(statement);
+        environment.define(statement.name.lexeme, function);
+        return null;
+    }
+
+    @Override
+    public Object visitReturnStmt(ReturnStmt statement) {
+        Object value = null;
+        if (statement.value != null) value = evaluate(statement.value);
+        throw new Return(value);
+    }
+
+    public void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+            for (Stmt stmt : statements) {
+                execute(stmt);
+                if (hitBreak) {
+                    break;
+                }
+            }
+        } finally {
+            this.environment = previous;
+        }
+    }
+    //#endregion
 
     //#region Expressions
     @Override
@@ -98,80 +204,32 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     }
 
     @Override
+    public Object visitCallExpr(CallExpr expression) {
+        Object callee = evaluate(expression.callee);
+
+        List<Object> arguments = new ArrayList<>();
+        for(Expr arg : expression.arguments) {
+            arguments.add(evaluate(arg));
+        }
+
+        if (!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(expression.paren, "Can only call functions and classes.");
+        }
+
+        LoxCallable function = (LoxCallable)callee;
+
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(expression.paren, "Expected " +
+                    function.arity() + " arguments but got " +
+                    arguments.size() + ".");
+        }
+
+        return function.call(this, arguments);
+    }
+
+    @Override
     public Object visitVariableExpr(VariableExpr expression) {
         return environment.get(expression.name);
-    }
-    //#endregion
-
-    //#region Statements
-    @Override
-    public Void visitExpressionStmt(ExpressionStmt statement) {
-        evaluate(statement.expression);
-        return null;
-    }
-
-    @Override
-    public Object visitPrintStmt(PrintStmt statement) {
-        Object value = evaluate(statement.expression);
-        System.out.println(stringify(value));
-        return null;
-    }
-
-    @Override
-    public Object visitVarStmt(VarStmt statement) {
-        Object value = null;
-        if (statement.initializer != null) {
-            value = evaluate(statement.initializer);
-        }
-
-        environment.define(statement.name.lexeme, value);
-        return null;
-    }
-
-    @Override
-    public Object visitBlockStmt(BlockStmt statement) {
-        executeBlock(statement.statements, new Environment(this.environment));
-        return null;
-    }
-
-    @Override
-    public Object visitIfStmt(IfStmt statement) {
-        if (isTruthy(evaluate(statement.condition))) {
-            execute(statement.ifStatement);
-        } else if (statement.elseStatement != null) {
-            execute(statement.elseStatement);
-        }
-        return null;
-    }
-
-    @Override
-    public Object visitWhileStmt(WhileStmt statement) {
-        while (!hitBreak && isTruthy(evaluate(statement.condition))) {
-            execute(statement.statement);
-        }
-        hitBreak = false;
-        return null;
-    }
-
-    @Override
-    public Object visitBreakStmt(BreakStmt statement) {
-        hitBreak = true;
-        return null;
-    }
-
-    private void executeBlock(List<Stmt> statements, Environment environment) {
-        Environment previous = this.environment;
-        try {
-            this.environment = environment;
-            for (Stmt stmt : statements) {
-                execute(stmt);
-                if (hitBreak) {
-                    break;
-                }
-            }
-        } finally {
-            this.environment = previous;
-        }
     }
     //#endregion
 
