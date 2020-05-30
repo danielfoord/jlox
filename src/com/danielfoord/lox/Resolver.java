@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.function.Predicate;
 
 public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
@@ -50,7 +49,7 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
                 .entrySet()
                 .stream()
                 .filter(e -> e.getValue().state == VariableState.DEFINED).forEach(stringScopeVariableEntry ->
-            Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
+                Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
         );
         endScope();
         return null;
@@ -193,7 +192,7 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     }
 
     private void resolveLocal(Expr expression, Token name) {
-        for (var i = scopes.size() - 1; i >=0 ; i--) {
+        for (var i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {
                 scopes.get(i).put(name.lexeme, new ScopeVariable(name, VariableState.ACCESSED));
                 interpreter.resolve(expression, scopes.size() - 1 - i);

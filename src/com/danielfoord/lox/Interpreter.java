@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     public final Environment globals = new Environment();
-    public Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
+    public Environment environment = globals;
     private boolean hitBreak = false;
 
     Interpreter() {
