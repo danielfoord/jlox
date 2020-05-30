@@ -18,4 +18,6 @@ public interface StmtVisitor<R> {
     R visitFunctionStmt(FunctionStmt statement);
 
     R visitReturnStmt(ReturnStmt statement);
+
+    R visitClassStmt(ClassStmt statement);
 }

@@ -127,6 +127,14 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         throw new Return(value);
     }
 
+    @Override
+    public Object visitClassStmt(ClassStmt statement) {
+        environment.define(statement.name.lexeme, null);
+        LoxClass klass = new LoxClass(statement.name.lexeme);
+        environment.assign(statement.name, klass);
+        return null;
+    }
+
     public void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
         try {

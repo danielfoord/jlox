@@ -9,7 +9,7 @@ With some challenges implemented.
 ```
 program           → declaration* EOF ;
 
-declaration       → varDeclaration | statement | funDecl ;
+declaration       → varDeclaration | statement | funDecl | classDecl;
 loopDeclaration   → varDeclaration | loopStatement ;
 
 varDeclaration    → "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -17,6 +17,8 @@ varDeclaration    → "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStmt | returnStmt;
 loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | breakStmt | returnStmt;
 printStmt         → "print" expression ";" ;
+
+classDecl         → "class" IDENTIFIER "{" function* "}" ;
 
 funDecl           → "fun" function;
 function          → IDENTIFIER "(" parameters? ")" block
@@ -35,7 +37,6 @@ forStmt           → "for" "(" ( varDeclaration | expression  ";" ) expression?
 ```
 ##### Lexical Grammar
 ```
-arguments         → expression ( "," expression )* ;
 expression        → assignment ;
 assignment        → IDENTIFIER "=" assignment | logic_or ;
 logic_or          → logic_and ( "or" logic_and )*;
@@ -46,5 +47,6 @@ addition          → multiplication ( ( "-" | "+" ) multiplication )* ;
 multiplication    → unary ( ( "/" | "*" ) unary )* ;
 unary             → ( "!" | "-" ) unary | call ;
 call              → primary ( "(" arguments? ")" )* ;
+arguments         → expression ( "," expression )* ;
 primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
 ```

@@ -88,6 +88,13 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         }
         return null;
     }
+
+    @Override
+    public Void visitClassStmt(ClassStmt statement) {
+        declare(statement.name);
+        define(statement.name);
+        return null;
+    }
     //#endregion
 
     //#region Expressions

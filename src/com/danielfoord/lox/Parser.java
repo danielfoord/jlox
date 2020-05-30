@@ -34,6 +34,8 @@ public class Parser {
                 return varDeclaration();
             if (peekMatch(TokenType.FUN))
                 return function("function");
+            if (peekMatch(TokenType.CLASS))
+                return classDeclaration();
             return statement(loopStatement);
         } catch (ParseError error) {
             synchronize();
@@ -51,6 +53,19 @@ public class Parser {
 
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new VarStmt(name, initializer);
+    }
+
+    private Stmt classDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Stmt> methods = new ArrayList<>();
+        while(!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+        return new ClassStmt(name, methods);
     }
 
     private Stmt function(String kind) {

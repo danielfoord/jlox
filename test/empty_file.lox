@@ -1,0 +1,10 @@
+class Dog {
+    woof() {
+      print "Woof!";
+    }
+}
+
+print Dog;
+
+var dog = Dog();
+print dog;
