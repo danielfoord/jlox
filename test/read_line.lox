@@ -1,0 +1,6 @@
+fun echoName(name) {
+  print name;
+}
+
+print "Enter your name:";
+echoName(readLine());

@@ -6,6 +6,9 @@ import com.danielfoord.lox.functions.LoxFunction;
 import com.danielfoord.lox.functions.Return;
 import com.danielfoord.lox.statements.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +28,26 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             }
 
             @Override
-            public Object call(Interpreter interpreter,
-                               List<Object> arguments) {
+            public Object call(Interpreter interpreter, List<Object> arguments) {
                 return (double) System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() {
+                return "<native fn>";
+            }
+        });
+
+        globals.define("readLine", new LoxCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) throws IOException {
+                var buffer = new BufferedReader(new InputStreamReader(System.in));
+                return buffer.readLine();
             }
 
             @Override
@@ -238,7 +258,11 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
                     arguments.size() + ".");
         }
 
-        return function.call(this, arguments);
+        try {
+            return function.call(this, arguments);
+        } catch(Exception error) {
+            throw new RuntimeError(expression.paren, error.getMessage());
+        }
     }
 
     @Override
