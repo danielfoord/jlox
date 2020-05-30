@@ -7,11 +7,14 @@ import com.danielfoord.lox.functions.Return;
 import com.danielfoord.lox.statements.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     public final Environment globals = new Environment();
     public Environment environment = globals;
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private boolean hitBreak = false;
 
     Interpreter() {
@@ -190,7 +193,14 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     @Override
     public Object visitAssignExpr(AssignExpr expression) {
         Object value = evaluate(expression.value);
-        environment.assign(expression.name, value);
+
+        Integer distance = locals.get(expression);
+        if (distance != null) {
+            environment.assignAt(distance, expression.name, value);
+        } else {
+            globals.assign(expression.name, value);
+        }
+
         return value;
     }
 
@@ -233,7 +243,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     @Override
     public Object visitVariableExpr(VariableExpr expression) {
-        return environment.get(expression.name);
+        return lookUpVariable(expression.name, expression);
     }
     //#endregion
 
@@ -317,6 +327,19 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             return text;
         }
         return object.toString();
+    }
+
+    private Object lookUpVariable(Token name, Expr expr) {
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return globals.get(name);
+        }
+    }
+
+    public void resolve(Expr expr, int depth) {
+        locals.put(expr, depth);
     }
     //#endregion
 }
