@@ -114,21 +114,21 @@ public class Parser {
     }
 
     private List<Stmt> block(boolean loopStatement) {
-      try {
-          List<Stmt> statements = new ArrayList<>();
-          while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-              Stmt statement = declaration(loopStatement);
-              statements.add(statement);
-              if (statement instanceof BreakStmt && (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd())) {
-                  throw error (peek(), "Unreachable code");
-              }
-          }
-          consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
-          return statements;
-      } catch(ParseError error) {
-          synchronize();
-          return null;
-      }
+        try {
+            List<Stmt> statements = new ArrayList<>();
+            while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+                Stmt statement = declaration(loopStatement);
+                statements.add(statement);
+                if (statement instanceof BreakStmt && (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd())) {
+                    throw error(peek(), "Unreachable code");
+                }
+            }
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
     }
 
     private Stmt ifStatement(boolean loopStatement) {

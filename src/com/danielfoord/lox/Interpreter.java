@@ -17,16 +17,20 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     Interpreter() {
         globals.define("clock", new LoxCallable() {
             @Override
-            public int arity() { return 0; }
+            public int arity() {
+                return 0;
+            }
 
             @Override
             public Object call(Interpreter interpreter,
                                List<Object> arguments) {
-                return (double)System.currentTimeMillis() / 1000.0;
+                return (double) System.currentTimeMillis() / 1000.0;
             }
 
             @Override
-            public String toString() { return "<native fn>"; }
+            public String toString() {
+                return "<native fn>";
+            }
         });
     }
 
@@ -208,7 +212,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
         Object callee = evaluate(expression.callee);
 
         List<Object> arguments = new ArrayList<>();
-        for(Expr arg : expression.arguments) {
+        for (Expr arg : expression.arguments) {
             arguments.add(evaluate(arg));
         }
 
@@ -216,7 +220,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             throw new RuntimeError(expression.paren, "Can only call functions and classes.");
         }
 
-        LoxCallable function = (LoxCallable)callee;
+        LoxCallable function = (LoxCallable) callee;
 
         if (arguments.size() != function.arity()) {
             throw new RuntimeError(expression.paren, "Expected " +
