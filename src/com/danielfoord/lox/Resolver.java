@@ -45,12 +45,7 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     public Void visitBlockStmt(BlockStmt statement) {
         beginScope();
         resolve(statement.statements);
-        scopes.peek()
-                .entrySet()
-                .stream()
-                .filter(e -> e.getValue().state == VariableState.DEFINED).forEach(stringScopeVariableEntry ->
-                Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
-        );
+        assertLocalVariablesUsed();
         endScope();
         return null;
     }
@@ -214,9 +209,19 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
             define(param);
         }
         resolve(function.body);
+        assertLocalVariablesUsed();
         endScope();
 
         currentFunction = enclosingFunction;
+    }
+
+    private void assertLocalVariablesUsed() {
+        scopes.peek()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue().state == VariableState.DEFINED).forEach(stringScopeVariableEntry ->
+                Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
+        );
     }
     //#endregion
 

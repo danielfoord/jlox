@@ -1,0 +1,3 @@
+{
+  var a; // [line 2] Error at 'a': Unused local variable
+}
