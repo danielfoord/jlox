@@ -122,11 +122,11 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     @Override
     public Void visitVariableExpr(VariableExpr expression) {
-        var scopeVariable = scopes.peek().get(expression.name.lexeme);
-        if (scopeVariable != null) {
-            if (!scopes.isEmpty() && scopeVariable.state == VariableState.DECLARED) {
-                Lox.error(expression.name, "Cannot read local variable in its own initializer.");
-            }
+        if (!scopes.empty()) {
+            var scopeVariable = scopes.peek().get(expression.name.lexeme);
+            if (scopeVariable != null)
+                if (scopeVariable.state == VariableState.DECLARED)
+                    Lox.error(expression.name, "Cannot read local variable in its own initializer.");
         }
 
         resolveLocal(expression, expression.name);
