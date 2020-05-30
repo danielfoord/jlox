@@ -10,5 +10,5 @@ fun fib(n) {
 // 2.061000108718872
 
 var start = clock();
-print fib(25) == 9227465;
+print fib(35) == 9227465;
 print clock() - start;
