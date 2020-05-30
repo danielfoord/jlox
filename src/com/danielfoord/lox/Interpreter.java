@@ -92,7 +92,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     @Override
     public Object visitFunctionStmt(FunctionStmt statement) {
-        LoxFunction function = new LoxFunction(statement);
+        LoxFunction function = new LoxFunction(statement, environment);
         environment.define(statement.name.lexeme, function);
         return null;
     }
