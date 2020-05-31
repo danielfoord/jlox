@@ -192,7 +192,7 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         if (currentClass != ClassType.CLASS) {
             Lox.error(expression.keyword, "Cannot use 'this' outside of class.");
         }
-        
+
         resolveLocal(expression, expression.keyword);
         return null;
     }
