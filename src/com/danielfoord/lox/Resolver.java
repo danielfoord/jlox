@@ -262,12 +262,14 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     }
 
     private void assertLocalVariablesUsed() {
-        scopes.peek()
+        scopes
+                .peek()
                 .entrySet()
                 .stream()
-                .filter(e -> e.getValue().state == VariableState.DEFINED).forEach(stringScopeVariableEntry ->
-                Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
-        );
+                .filter(e -> e.getValue().state == VariableState.DEFINED)
+                .forEach(stringScopeVariableEntry ->
+                        Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
+                );
     }
     //#endregion
 
