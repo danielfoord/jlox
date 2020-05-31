@@ -4,57 +4,25 @@ import com.danielfoord.lox.expressions.*;
 import com.danielfoord.lox.functions.LoxCallable;
 import com.danielfoord.lox.functions.LoxFunction;
 import com.danielfoord.lox.functions.Return;
+import com.danielfoord.lox.globals.Clock;
+import com.danielfoord.lox.globals.ReadLine;
 import com.danielfoord.lox.statements.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
+
     public final Environment globals = new Environment();
     private final Map<Expr, Integer> locals = new HashMap<>();
     public Environment environment = globals;
     private boolean hitBreak = false;
 
     Interpreter() {
-        globals.define("clock", new LoxCallable() {
-            @Override
-            public int arity() {
-                return 0;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return (double) System.currentTimeMillis() / 1000.0;
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("readLine", new LoxCallable() {
-            @Override
-            public int arity() {
-                return 0;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) throws IOException {
-                var buffer = new BufferedReader(new InputStreamReader(System.in));
-                return buffer.readLine();
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
+        globals.define("clock", new Clock());
+        globals.define("readLine", new ReadLine());
     }
 
     //#region Statements
@@ -130,7 +98,14 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     @Override
     public Object visitClassStmt(ClassStmt statement) {
         environment.define(statement.name.lexeme, null);
-        LoxClass klass = new LoxClass(statement.name.lexeme);
+
+        Map<String, LoxFunction> methods = new HashMap<>();
+        for (Stmt method : statement.methods) {
+            LoxFunction function = new LoxFunction((FunctionStmt) method, environment);
+            methods.put(((FunctionStmt) method).name.lexeme, function);
+        }
+
+        LoxClass klass = new LoxClass(statement.name.lexeme, methods);
         environment.assign(statement.name, klass);
         return null;
     }
@@ -170,6 +145,8 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
             case PLUS:
                 assertOperandTypes(expression.operator, left, right);
                 return (double) left + (double) right;
+            case PLUS_PLUS:
+                return left.toString() + right.toString();
             case GREATER:
                 assertOperandTypes(expression.operator, left, right);
                 return (double) left > (double) right;
@@ -268,9 +245,35 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
         try {
             return function.call(this, arguments);
-        } catch(Exception error) {
+        } catch (Exception error) {
             throw new RuntimeError(expression.paren, error.getMessage());
         }
+    }
+
+    @Override
+    public Object visitGetExpr(GetExpr expression) {
+        Object object = evaluate(expression.object);
+        if (object instanceof LoxInstance) {
+            return ((LoxInstance) object).get(expression.name);
+        }
+
+        throw new RuntimeError(expression.name, "Only instances have properties.");
+    }
+
+    @Override
+    public Object visitSetExpr(SetExpr expression) {
+        Object object = evaluate(expression.object);
+        if (object instanceof LoxInstance) {
+            ((LoxInstance) object).set(expression.name, evaluate(expression.value));
+            return null;
+        }
+
+        throw new RuntimeError(expression.name, "Only instances have properties.");
+    }
+
+    @Override
+    public Object visitThisExpr(ThisExpr expression) {
+        return lookUpVariable(expression.keyword, expression);
     }
 
     @Override

@@ -85,7 +85,7 @@ class Lox {
     }
 
     static void runtimeError(RuntimeError error) {
-        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        System.err.println("Runtime Error: " + error.getMessage() + "\n[line " + error.token.line + "]");
         hadRuntimeError = true;
     }
 }

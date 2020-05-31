@@ -38,15 +38,15 @@ forStmt           → "for" "(" ( varDeclaration | expression  ";" ) expression?
 ##### Lexical Grammar
 ```
 expression        → assignment ;
-assignment        → IDENTIFIER "=" assignment | logic_or ;
+assignment        → ( call ".")? IDENTIFIER "=" assignment | logic_or ;
 logic_or          → logic_and ( "or" logic_and )*;
 logic_and         → equality ( "and" equality )*;
 equality          → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison        → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition          → multiplication ( ( "-" | "+" ) multiplication )* ;
 multiplication    → unary ( ( "/" | "*" ) unary )* ;
-unary             → ( "!" | "-" ) unary | call ;
-call              → primary ( "(" arguments? ")" )* ;
+unary             → ( "!" | "-" ) unary | call ;    
+call              → primary ( ( "(" arguments? ")" | "." IDENTIFIER ) )* ;
 arguments         → expression ( "," expression )* ;
 primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
 ```

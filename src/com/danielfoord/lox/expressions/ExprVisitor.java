@@ -16,4 +16,10 @@ public interface ExprVisitor<R> {
     R visitLogicExpr(LogicExpr expression);
 
     R visitCallExpr(CallExpr expression);
+
+    R visitGetExpr(GetExpr expression);
+
+    R visitSetExpr(SetExpr expression);
+
+    R visitThisExpr(ThisExpr expression);
 }

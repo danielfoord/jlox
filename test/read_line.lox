@@ -1,6 +1,10 @@
-fun echoName(name) {
-  print name;
+fun sayHello(name) {
+  print "Hello, " ++ name;
 }
 
+print sayHello;
+print readLine;
+
 print "Enter your name:";
-echoName(readLine());
+sayHello(readLine());
+

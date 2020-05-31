@@ -60,7 +60,7 @@ public class Parser {
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
         List<Stmt> methods = new ArrayList<>();
-        while(!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+        while (!checkNext(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"));
         }
 
@@ -231,6 +231,9 @@ public class Parser {
             if (expr instanceof VariableExpr) {
                 Token name = ((VariableExpr) expr).name;
                 return new AssignExpr(name, value);
+            } else if (expr instanceof GetExpr) {
+                GetExpr get = (GetExpr) expr;
+                return new SetExpr(get.object, get.name, value);
             }
 
             throw error(equals, "Invalid assignment target.");
@@ -290,7 +293,7 @@ public class Parser {
     private Expr addition() {
         Expr expr = multiplication();
 
-        while (peekMatch(TokenType.PLUS, TokenType.MINUS)) {
+        while (peekMatch(TokenType.PLUS, TokenType.MINUS, TokenType.PLUS_PLUS)) {
             Token operator = previous();
             Expr right = multiplication();
             expr = new BinaryExpr(expr, operator, right);
@@ -327,6 +330,9 @@ public class Parser {
         while (true) {
             if (peekMatch(TokenType.LEFT_PAREN)) {
                 expression = finishCall(expression);
+            } else if (peekMatch(TokenType.DOT)) {
+                Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'");
+                expression = new GetExpr(expression, name);
             } else {
                 break;
             }
@@ -345,6 +351,9 @@ public class Parser {
             return new VariableExpr(previous());
         if (peekMatch(TokenType.NUMBER, TokenType.STRING))
             return new LiteralExpr(previous().literal);
+        if (peekMatch(TokenType.THIS)) {
+            return new ThisExpr(previous());
+        }
 
         if (peekMatch(TokenType.LEFT_PAREN)) {
             Expr expr = expression();

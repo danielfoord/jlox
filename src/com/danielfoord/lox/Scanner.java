@@ -75,7 +75,7 @@ public class Scanner {
                 addToken(TokenType.MINUS);
                 break;
             case '+':
-                addToken(TokenType.PLUS);
+                addToken(match('+') ? TokenType.PLUS_PLUS : TokenType.PLUS);
                 break;
             case ';':
                 addToken(TokenType.SEMICOLON);

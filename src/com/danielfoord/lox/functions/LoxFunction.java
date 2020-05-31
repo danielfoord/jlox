@@ -2,6 +2,7 @@ package com.danielfoord.lox.functions;
 
 import com.danielfoord.lox.Environment;
 import com.danielfoord.lox.Interpreter;
+import com.danielfoord.lox.LoxInstance;
 import com.danielfoord.lox.statements.FunctionStmt;
 
 import java.util.List;
@@ -33,6 +34,12 @@ public class LoxFunction implements LoxCallable {
             return returnValue.value;
         }
         return null;
+    }
+
+    public LoxFunction bind(LoxInstance instance) {
+        Environment env = new Environment(closure);
+        env.define("this", instance);
+        return new LoxFunction(declaration, env);
     }
 
     @Override

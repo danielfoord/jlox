@@ -13,6 +13,7 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, ScopeVariable>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -91,8 +92,23 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     @Override
     public Void visitClassStmt(ClassStmt statement) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         declare(statement.name);
         define(statement.name);
+
+        beginScope();
+        scopes.peek().put("this", new ScopeVariable(null, VariableState.DECLARED));
+
+        for (Stmt method : statement.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            resolveFunction((FunctionStmt) method, declaration);
+        }
+
+        endScope();
+        currentClass = enclosingClass;
+
         return null;
     }
     //#endregion
@@ -155,6 +171,29 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         for (Expr arg : expression.arguments) {
             resolve(arg);
         }
+        return null;
+    }
+
+    @Override
+    public Void visitGetExpr(GetExpr expression) {
+        resolve(expression.object);
+        return null;
+    }
+
+    @Override
+    public Void visitSetExpr(SetExpr expression) {
+        resolve(expression.object);
+        resolve(expression.value);
+        return null;
+    }
+
+    @Override
+    public Void visitThisExpr(ThisExpr expression) {
+        if (currentClass != ClassType.CLASS) {
+            Lox.error(expression.keyword, "Cannot use 'this' outside of class.");
+        }
+        
+        resolveLocal(expression, expression.keyword);
         return null;
     }
     //#endregion
@@ -234,7 +273,13 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     private enum FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
+    }
+
+    private enum ClassType {
+        NONE,
+        CLASS
     }
 
     private enum VariableState {
