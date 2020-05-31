@@ -84,6 +84,11 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         if (currentFunction == FunctionType.NONE) {
             Lox.error(statement.keyword, "Cannot return from top-level code.");
         }
+
+        if (currentFunction == FunctionType.INITIALIZER) {
+            Lox.error(statement.keyword, "Cannot return from an initializer.");
+        }
+
         if (statement.value != null) {
             resolve(statement.value);
         }
@@ -102,8 +107,10 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         scopes.peek().put("this", new ScopeVariable(null, VariableState.DECLARED));
 
         for (Stmt method : statement.methods) {
-            FunctionType declaration = FunctionType.METHOD;
-            resolveFunction((FunctionStmt) method, declaration);
+            var fnStmt = (FunctionStmt) method;
+            resolveFunction((FunctionStmt) method, fnStmt.name.lexeme.equals("init")
+                    ? FunctionType.INITIALIZER
+                    : FunctionType.METHOD);
         }
 
         endScope();
@@ -264,11 +271,11 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     private void assertLocalVariablesUsed() {
         scopes
                 .peek()
-                .entrySet()
+                .values()
                 .stream()
-                .filter(e -> e.getValue().state == VariableState.DEFINED)
-                .forEach(stringScopeVariableEntry ->
-                        Lox.error(stringScopeVariableEntry.getValue().declarationToken, "Unused local variable")
+                .filter(variable -> variable.state == VariableState.DEFINED)
+                .forEach(variable ->
+                        Lox.error(variable.declarationToken, "Unused local variable")
                 );
     }
     //#endregion
@@ -276,7 +283,8 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     private enum FunctionType {
         NONE,
         FUNCTION,
-        METHOD
+        METHOD,
+        INITIALIZER
     }
 
     private enum ClassType {

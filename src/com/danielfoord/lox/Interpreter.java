@@ -83,7 +83,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     @Override
     public Object visitFunctionStmt(FunctionStmt statement) {
-        LoxFunction function = new LoxFunction(statement, environment);
+        LoxFunction function = new LoxFunction(statement, environment, false);
         environment.define(statement.name.lexeme, function);
         return null;
     }
@@ -101,7 +101,8 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
         Map<String, LoxFunction> methods = new HashMap<>();
         for (Stmt method : statement.methods) {
-            LoxFunction function = new LoxFunction((FunctionStmt) method, environment);
+            var fnStmt = (FunctionStmt) method;
+            LoxFunction function = new LoxFunction(fnStmt, environment, fnStmt.name.lexeme.equals("init"));
             methods.put(((FunctionStmt) method).name.lexeme, function);
         }
 
