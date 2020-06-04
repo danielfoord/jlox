@@ -57,6 +57,12 @@ public class Parser {
 
     private Stmt classDeclaration() {
         Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        VariableExpr superClass = null;
+        if (peekMatch(TokenType.LESS)) {
+            consume(TokenType.IDENTIFIER, "Expect parent class name.");
+            superClass = new VariableExpr(previous());
+        }
+
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
         List<Stmt> methods = new ArrayList<>();
@@ -65,7 +71,7 @@ public class Parser {
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
-        return new ClassStmt(name, methods);
+        return new ClassStmt(name, superClass, methods);
     }
 
     private Stmt function(String kind) {

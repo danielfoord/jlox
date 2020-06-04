@@ -18,7 +18,7 @@ statement         → exprStmt | printStmt | block | ifStmt | whileStmt | forStm
 loopStatement     → exprStmt | printStmt | loopBlock | loopIfStmt | whileStmt | forStmt | breakStmt | returnStmt;
 printStmt         → "print" expression ";" ;
 
-classDecl         → "class" IDENTIFIER "{" function* "}" ;
+classDecl         → "class" IDENTIFIER ("<" IDENTIFIER)? "{" function* "}" ;
 
 funDecl           → "fun" function;
 function          → IDENTIFIER "(" parameters? ")" block
