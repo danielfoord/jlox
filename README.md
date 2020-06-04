@@ -34,9 +34,7 @@ ifStmt            → "if" "(" expression ")" statement "else" statement ";" ;
 loopIfStmt        → "if" "(" expression ")" loopStatement "else" loopStatement ";" ;
 whileStmt         → "while" "(" expression ")" loopStatement ;
 forStmt           → "for" "(" ( varDeclaration | expression  ";" ) expression? ";" expression? ")" loopStatement ;
-```
-##### Lexical Grammar
-```
+
 expression        → assignment ;
 assignment        → ( call ".")? IDENTIFIER "=" assignment | logic_or ;
 logic_or          → logic_and ( "or" logic_and )*;
