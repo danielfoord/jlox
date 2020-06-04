@@ -155,7 +155,7 @@ public class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
                 assertOperandTypes(expression.operator, left, right);
                 return (double) left + (double) right;
             case PLUS_PLUS:
-                return left.toString() + right.toString();
+                return stringify(left) + stringify(right);
             case GREATER:
                 assertOperandTypes(expression.operator, left, right);
                 return (double) left > (double) right;
