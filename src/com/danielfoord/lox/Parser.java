@@ -357,8 +357,14 @@ public class Parser {
             return new VariableExpr(previous());
         if (peekMatch(TokenType.NUMBER, TokenType.STRING))
             return new LiteralExpr(previous().literal);
-        if (peekMatch(TokenType.THIS)) {
+        if (peekMatch(TokenType.THIS))
             return new ThisExpr(previous());
+
+        if (peekMatch(TokenType.SUPER)) {
+            Token keyword = previous();
+            consume(TokenType.DOT, "Expect method '.' after 'super'");
+            Token method = consume(TokenType.IDENTIFIER, "Expect superclass method call");
+            return new SuperExpr(keyword, method);
         }
 
         if (peekMatch(TokenType.LEFT_PAREN)) {

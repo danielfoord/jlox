@@ -108,7 +108,10 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         }
 
         if (statement.superClass != null) {
+            currentClass = ClassType.SUBCLASS;
             resolve(statement.superClass);
+            beginScope();
+            scopes.peek().put("super", new ScopeVariable(null, VariableState.DECLARED));
         }
 
         beginScope();
@@ -122,6 +125,11 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
         }
 
         endScope();
+
+        if (statement.superClass != null) {
+            endScope();
+        }
+
         currentClass = enclosingClass;
 
         return null;
@@ -204,10 +212,21 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     @Override
     public Void visitThisExpr(ThisExpr expression) {
-        if (currentClass != ClassType.CLASS) {
+        if (currentClass == ClassType.NONE) {
             Lox.error(expression.keyword, "Cannot use 'this' outside of class.");
         }
 
+        resolveLocal(expression, expression.keyword);
+        return null;
+    }
+
+    @Override
+    public Void visitSuperExpr(SuperExpr expression) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expression.keyword, "Cannot use 'super' outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+            Lox.error(expression.keyword, "Cannot use 'super' in a class with no superclass.");
+        }
         resolveLocal(expression, expression.keyword);
         return null;
     }
@@ -277,14 +296,9 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
     }
 
     private void assertLocalVariablesUsed() {
-        scopes
-                .peek()
-                .values()
-                .stream()
-                .filter(variable -> variable.state == VariableState.DEFINED)
-                .forEach(variable ->
-                        Lox.error(variable.declarationToken, "Unused local variable")
-                );
+        // TODO: Refactor this, looks nice, but it looks slow
+
+
     }
     //#endregion
 
@@ -297,7 +311,8 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     private enum ClassType {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 
     private enum VariableState {

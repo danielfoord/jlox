@@ -46,5 +46,5 @@ multiplication    → unary ( ( "/" | "*" ) unary )* ;
 unary             → ( "!" | "-" ) unary | call ;    
 call              → primary ( ( "(" arguments? ")" | "." IDENTIFIER ) )* ;
 arguments         → expression ( "," expression )* ;
-primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER;
+primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER | "super" . IDENTIFER ;
 ```

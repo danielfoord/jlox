@@ -22,4 +22,6 @@ public interface ExprVisitor<R> {
     R visitSetExpr(SetExpr expression);
 
     R visitThisExpr(ThisExpr expression);
+
+    R visitSuperExpr(SuperExpr expression);
 }
