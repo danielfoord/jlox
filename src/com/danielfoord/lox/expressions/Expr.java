@@ -14,6 +14,8 @@ package com.danielfoord.lox.expressions;
 // operator   → "==" | "!=" | "<" | "<=" | ">" | ">="
 //            | "+"  | "-"  | "*" | "/" ;
 
-public abstract class Expr {
+import java.io.Serializable;
+
+public abstract class Expr implements Serializable {
     public abstract <R> R accept(ExprVisitor<R> visitor);
 }

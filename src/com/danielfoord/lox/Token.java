@@ -1,6 +1,8 @@
 package com.danielfoord.lox;
 
-public class Token {
+import java.io.Serializable;
+
+public class Token implements Serializable {
     public final TokenType type;
     public final String lexeme;
     public final Object literal;
