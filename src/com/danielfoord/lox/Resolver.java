@@ -297,8 +297,14 @@ public class Resolver implements StmtVisitor<Void>, ExprVisitor<Void> {
 
     private void assertLocalVariablesUsed() {
         // TODO: Refactor this, looks nice, but it looks slow
-
-
+        scopes
+            .peek()
+            .values()
+            .stream()
+            .filter(variable -> variable.state == VariableState.DEFINED)
+            .forEach(variable ->
+                    Lox.error(variable.declarationToken, "Unused local variable")
+            );
     }
     //#endregion
 
