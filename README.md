@@ -3,6 +3,8 @@
 An implementation of Lox from [craftinginterpreters.com](craftinginterpreters.com).
 With some challenges implemented.
 
+<hr >
+
 #### Context free grammar:
 
 ##### Syntactic Grammar
@@ -48,3 +50,14 @@ call              → primary ( ( "(" arguments? ")" | "." IDENTIFIER ) )* ;
 arguments         → expression ( "," expression )* ;
 primary           → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | IDENTIFIER | "super" . IDENTIFER ;
 ```
+<hr >
+
+#### Yet to be implemented:
+
+ - [ ] Try/Catch statement
+ - [ ] `assert` built in method
+ - [ ] Runtime jar output
+ - [ ] Runtime docker image publish
+ - [ ] Lox native methods for writing simple unit tests
+ - [ ] Namespacing/Packaging
+ - [ ] Vscode plugin
