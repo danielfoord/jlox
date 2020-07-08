@@ -1,6 +1,6 @@
 # Lox 
 
-An implementation of Lox from [craftinginterpreters.com](craftinginterpreters.com).
+An implementation of Lox from [craftinginterpreters.com](https://craftinginterpreters.com).
 With some challenges implemented.
 
 <hr >
